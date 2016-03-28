@@ -16,6 +16,27 @@
 //    0x20 - Skill ignores target's defense (misc type always ignores)
 //    0x40 - Skill ignores target's flee (magic type always ignores)
 //    0x80 - Skill ignores target's def cards
+//
+//  - Expanded NK Flags [Cydh]
+//  - These flags are split value of 0x08 - Skill ignores caster's % damage cards
+//  - If you want to this flag works better, remove the 0x08 and 0x10 first
+//    0x000100 - Skill ignores caster's % range damage cards (bLongAtkRate)
+//    0x000200 - Skill ignores caster's % race damage cards (bAddRace, bMagicAddRace, bAddRace2)
+//    0x000400 - Skill ignores caster's % class damage cards (bAddClass, bMagicAddClass)
+//    0x000800 - Skill ignores caster's % elemental damage cards (bAddEle, bMagicAddEle, bMagicAtkEle) (split of 0x10 - Skill ignores elemental adjustments)
+//    0x001000 - Skill ignores caster's % size damage cards (bAddSize, bMagicAddSize)
+//    0x002000 - Skill ignores caster's % specific monster damage cards (bAddDamageClass, bAddMagicDamageClass)
+//    0x004000 - Skill ignores caster's % skill-type & mastery mastery bonus? (Adv. Katar Mastery)
+//  - These flags are split value of 0x80 - Skill ignores target's def cards
+//  - If you want to this flag works better, remove the 0x80 and 0x10 first
+//    0x008000 - Skill ignores target's range reduction cards (bNearAtkDef, bLongAtkDef)
+//    0x010000 - Skill ignores target's race reduction cards (bSubRace, bSubRace2)
+//    0x020000 - Skill ignores target's class reduction cards (bSubClass)
+//    0x040000 - Skill ignores target's elemental reduction cards (bSubEle) (split of 0x10 - Skill ignores elemental adjustments)
+//    0x080000 - Skill ignores target's size reduction cards (bSubSize, bSubDefEle)
+//    0x100000 - Skill ignores target's specific monster reduction cards (bAddDefMonster, bAddMDefMonster)
+//    0x200000 - Skill ignores target's skill-type reduction cards (bMagicAtkDef, bMiscAtkDef)
+//    0x400000 - Skill ignores target's status reduction bonus (SC_MDEF_RATE, SC_DEF_RATE)
 // 07 splash/effect range (-1 for screen-wide)
 // 08 MaxLv
 // 09 Number of hits (when positive, damage is increased by hits, 

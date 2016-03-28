@@ -40,6 +40,27 @@ enum e_skill_nk {
 	NK_IGNORE_DEF     = 0x20,
 	NK_IGNORE_FLEE    = 0x40,
 	NK_NO_CARDFIX_DEF = 0x80,
+
+	// Expanded NK Flags [Cydh]
+	// These flags are split value of 0x08 - Skill ignores caster's % damage cards
+	NK_NO_CARDFIX_ATK_RANGE  = 0x000100, ///< Skill ignores caster's % range damage cards (bLongAtkRate)
+	NK_NO_CARDFIX_ATK_RACE   = 0x000200, ///< Skill ignores caster's % race damage cards (bAddRace, bMagicAddRace, bAddRace2)
+	NK_NO_CARDFIX_ATK_CLASS  = 0x000400, ///< Skill ignores caster's % class damage cards (bAddClass, bMagicAddClass)
+	NK_NO_CARDFIX_ATK_ELE    = 0x000800, ///< Skill ignores caster's % elemental damage cards (bAddEle, bMagicAddEle, bMagicAtkEle) (split of 0x10 - Skill ignores elemental adjustments)
+	NK_NO_CARDFIX_ATK_SIZE   = 0x001000, ///< Skill ignores caster's % size damage cards (bAddSize, bMagicAddSize)
+	NK_NO_CARDFIX_ATK_MOB    = 0x002000, ///< Skill ignores caster's % specific monster damage cards (bAddDamageClass, bAddMagicDamageClass)
+	NK_NO_CARDFIX_ATK_SKILL  = 0x004000, ///< Skill ignores caster's % skill-type & mastery mastery bonus? (Adv. Katar Mastery)
+
+	// These flags are split value of 0x80 - Skill ignores target's def cards
+	NK_NO_CARDFIX_DEF_RANGE  = 0x008000, ///< Skill ignores target's range reduction cards (bNearAtkDef, bLongAtkDef)
+	NK_NO_CARDFIX_DEF_RACE   = 0x010000, ///< Skill ignores target's race reduction cards (bSubRace, bSubRace2)
+	NK_NO_CARDFIX_DEF_CLASS  = 0x020000, ///< Skill ignores target's class reduction cards (bSubClass)
+	NK_NO_CARDFIX_DEF_ELE    = 0x040000, ///< Skill ignores target's elemental reduction cards (bSubEle) (split of 0x10 - Skill ignores elemental adjustments)
+	NK_NO_CARDFIX_DEF_SIZE   = 0x080000, ///< Skill ignores target's size reduction cards (bSubSize, bSubDefEle)
+	NK_NO_CARDFIX_DEF_MOB    = 0x100000, ///< Skill ignores target's specific monster reduction cards (bAddDefMonster, bAddMDefMonster)
+	NK_NO_CARDFIX_DEF_SKILL  = 0x200000, ///< Skill ignores target's skill-type reduction cards (bMagicAtkDef, bMiscAtkDef)
+	NK_NO_CARDFIX_DEF_STATUS = 0x400000, ///< Skill ignores target's status reduction bonus (SC_MDEF_RATE, SC_DEF_RATE)
+
 };
 
 /// Constants to identify the skill's inf value:

@@ -3227,6 +3227,8 @@ int unit_free(struct block_list *bl, clr_type clrtype)
 				pc_bonus_script_clear(sd, BSF_REM_ALL);
 
 			pc_itemgrouphealrate_clear(sd);
+			pc_resSC_clear(sd);
+			pc_resSC2_clear(sd);
 			break;
 		}
 		case BL_PET: {

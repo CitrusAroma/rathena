@@ -55,6 +55,8 @@ int night_timer_tid = INVALID_TIMER;
 
 struct eri *pc_sc_display_ers = NULL;
 struct eri *pc_itemgrouphealrate_ers = NULL;
+struct eri *pc_resSC_ers = NULL;
+struct eri *pc_resSC2_ers = NULL;
 int pc_expiration_tid = INVALID_TIMER;
 
 struct fame_list smith_fame_list[MAX_FAME_LIST];
@@ -1197,6 +1199,11 @@ bool pc_authok(struct map_session_data *sd, uint32 login_id2, time_t expiration_
 
 	sd->qi_display = NULL;
 	sd->qi_count = 0;
+
+	sd->resSC = NULL;
+	sd->resSC_count = 0;
+	sd->resSC2 = NULL;
+	sd->resSC2_count = 0;
 
 	//warp player
 	if ((i=pc_setpos(sd,sd->status.last_point.map, sd->status.last_point.x, sd->status.last_point.y, CLR_OUTSIGHT)) != SETPOS_OK) {
@@ -2420,6 +2427,148 @@ void pc_itemgrouphealrate_clear(struct map_session_data *sd) {
 		sd->itemgrouphealrate_count = 0;
 		aFree(sd->itemgrouphealrate);
 		sd->itemgrouphealrate = NULL;
+	}
+}
+
+/** Get bResSC rate from player
+* @param sd Player
+* @param type SC Type
+* @return Resistance rate
+* @author Cydh
+*/
+short pc_resSC(struct map_session_data *sd, sc_type type) {
+	uint8 i;
+
+	nullpo_ret(sd);
+
+	if (!sd->resSC || !sd->resSC_count)
+		return 0;
+	for (i = 0; i < sd->resSC_count; i++) {
+		if (sd->resSC[i]->sc == type)
+			return sd->resSC[i]->rate;
+	}
+	return 0;
+}
+
+/** Add bResSC data to player
+* @param sd Player
+* @param type SC Type
+* @param rate
+* @author Cydh
+*/
+void pc_resSC_add(struct map_session_data *sd, sc_type type, short rate) {
+	struct s_pc_resSC *entry;
+	uint8 i;
+
+	for (i = 0; i < sd->resSC_count; i++) {
+		if (sd->resSC[i]->sc == type)
+			break;
+	}
+
+	if (i != sd->resSC_count) {
+		sd->resSC[i]->rate += rate;
+		return;
+	}
+
+	if (i == UINT8_MAX) {
+		ShowError("pc_resSC_add: Reached max (%d) possible bonuses for this player %d\n", UINT8_MAX);
+		return;
+	}
+
+	entry = ers_alloc(pc_resSC_ers, struct s_pc_resSC);
+	entry->sc = type;
+	entry->rate = rate;
+
+	RECREATE(sd->resSC, struct s_pc_resSC *, sd->resSC_count+1);
+	sd->resSC[sd->resSC_count++] = entry;
+}
+
+/** Clear resSC from player
+* @param sd Player
+* @author Cydh
+*/
+void pc_resSC_clear(struct map_session_data *sd) {
+	if (!sd || !sd->resSC_count)
+		return;
+	else {
+		uint8 i;
+		for( i = 0; i < sd->resSC_count; i++ )
+			ers_free(pc_resSC_ers, sd->resSC[i]);
+		sd->resSC_count = 0;
+		aFree(sd->resSC);
+		sd->resSC = NULL;
+	}
+}
+
+
+/** Get bResSC2 rate from player
+* @param sd Player
+* @param type SC Type
+* @return Resistance rate
+* @author Cydh
+*/
+short pc_resSC2(struct map_session_data *sd, sc_type type) {
+	uint8 i;
+
+	nullpo_ret(sd);
+
+	if (!sd->resSC2 || !sd->resSC2_count)
+		return 0;
+
+	for (i = 0; i < sd->resSC2_count; i++) {
+		if (sd->resSC2[i]->sc == type)
+			return sd->resSC2[i]->rate;
+	}
+	return 0;
+}
+
+/** Add bResSC2 data to player
+* @param sd Player
+* @param type SC Type
+* @param rate
+* @author Cydh
+*/
+void pc_resSC2_add(struct map_session_data *sd, sc_type type, short rate) {
+	struct s_pc_resSC *entry;
+	uint8 i;
+
+	for (i = 0; i < sd->resSC2_count; i++) {
+		if (sd->resSC2[i]->sc == type)
+			break;
+	}
+
+	if (i != sd->resSC2_count) {
+		sd->resSC2[i]->rate += rate;
+		return;
+	}
+
+	if (i == UINT8_MAX) {
+		ShowError("pc_resSC2_add: Reached max (%d) possible bonuses for this player %d\n", UINT8_MAX);
+		return;
+	}
+
+	entry = ers_alloc(pc_resSC2_ers, struct s_pc_resSC);
+	entry->sc = type;
+	entry->rate = rate;
+
+	RECREATE(sd->resSC2, struct s_pc_resSC *, sd->resSC2_count+1);
+	sd->resSC2[sd->resSC2_count++] = entry;
+}
+
+/** Clear resSC2 from player
+* @param sd Player
+* @author Cydh
+*/
+void pc_resSC2_clear(struct map_session_data *sd) {
+	if (!sd || !sd->resSC2_count)
+		return;
+	else {
+		uint8 i;
+		for( i = 0; i < sd->resSC2_count; i++ )
+			ers_free(pc_resSC2_ers, sd->resSC2[i]);
+		sd->resSC2_count = 0;
+		aFree(sd->resSC2);
+		sd->resSC2 = NULL;
 	}
 }
 
@@ -3728,6 +3877,16 @@ void pc_bonus2(struct map_session_data *sd,int type,int type2,int val)
 		PC_BONUS_CHK_CLASS(type2, SP_DROP_ADDCLASS);
 		if (sd->state.lr_flag != 2)
 			sd->dropaddclass[type2] += val;
+		break;
+	case SP_RES_SC: // bonus2 bResSC,sc,n;
+		PC_BONUS_CHK_SC(type2, SP_RESSC);
+		if (sd->state.lr_flag != 2)
+			pc_resSC_add(sd, (sc_type)type2, val);
+		break;
+	case SP_RES_SC2: // bonus2 bResSC2,sc,n;
+		PC_BONUS_CHK_SC(type2, SP_RES_SC2);
+		if (sd->state.lr_flag != 2)
+			pc_resSC2_add(sd, (sc_type)type2, val);
 		break;
 	default:
 		if (running_npc_stat_calc_event) {
@@ -12269,6 +12428,8 @@ void do_final_pc(void) {
 
 	ers_destroy(pc_sc_display_ers);
 	ers_destroy(pc_itemgrouphealrate_ers);
+	ers_destroy(pc_resSC_ers);
+	ers_destroy(pc_resSC2_ers);
 	ers_destroy(num_reg_ers);
 	ers_destroy(str_reg_ers);
 }
@@ -12313,6 +12474,8 @@ void do_init_pc(void) {
 
 	pc_sc_display_ers = ers_new(sizeof(struct sc_display_entry), "pc.c:pc_sc_display_ers", ERS_OPT_FLEX_CHUNK);
 	pc_itemgrouphealrate_ers = ers_new(sizeof(struct s_pc_itemgrouphealrate), "pc.c:pc_itemgrouphealrate_ers", ERS_OPT_NONE);
+	pc_resSC_ers = ers_new(sizeof(struct s_pc_resSC), "pc.c:pc_resSC_ers", ERS_OPT_NONE);
+	pc_resSC2_ers = ers_new(sizeof(struct s_pc_resSC), "pc.c:pc_resSC2_ers", ERS_OPT_NONE);
 	num_reg_ers = ers_new(sizeof(struct script_reg_num), "pc.c:num_reg_ers", ERS_OPT_CLEAN|ERS_OPT_FLEX_CHUNK);
 	str_reg_ers = ers_new(sizeof(struct script_reg_str), "pc.c:str_reg_ers", ERS_OPT_CLEAN|ERS_OPT_FLEX_CHUNK);
 

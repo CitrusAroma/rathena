@@ -678,6 +678,8 @@
 	script_set_constant("bIgnoreDefClassRate", SP_IGNORE_DEF_CLASS_RATE, false);
 	script_set_constant("bRegenPercentHP", SP_REGEN_PERCENT_HP, false);
 	script_set_constant("bRegenPercentSP", SP_REGEN_PERCENT_SP, false);
+	script_set_constant("bResSC", SP_RES_SC, false);
+	script_set_constant("bResSC2", SP_RES_SC2, false);
 
 	/* equip indices */
 	export_constant(EQI_HEAD_TOP);
